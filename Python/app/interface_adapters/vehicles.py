@@ -74,3 +74,14 @@ class Car(IVehicle):
 
     def vehicle_type(self):
         return self.vehicle
+    
+
+class Buss(IVehicle):
+    def __init__(self):
+        self.vehicle = "Buss"
+
+    def __str__(self):
+        return self.vehicle
+
+    def vehicle_type(self):
+        return self.vehicle
