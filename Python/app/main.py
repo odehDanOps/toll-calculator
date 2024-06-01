@@ -1,28 +1,42 @@
-from flask import Flask, Blueprint
+from flask import Flask, Blueprint, redirect, url_for, jsonify, abort
 from flask_migrate import Migrate
 from flask_seeder import FlaskSeeder
-from flask import jsonify
+from apifairy import body, response, other_responses
 
 from .interface_adapters import ApplicationAdapter, SQLAdapter, DatabaseAdapter
 from .use_cases import VehicleTollFee
-# from .database import engine
-from .model import engine as db
-from.config import CITY_VEHICLES as city_vehicles
+from .model import engine as db, ma
+from apifairy import APIFairy
 
 migrate = Migrate(db=db)
+apifairy = APIFairy()
 bp = Blueprint('fees', __name__)
 
 def routes(application_adapter):
+    from .schema import VehicleTollFeeSchema, VehicleTollFeeRequestSchema, \
+        CityTollFeeRateSchema
+    vehicle_toll_fees_request_schema = VehicleTollFeeRequestSchema()
+    vehicle_toll_fee_schema = VehicleTollFeeSchema()
+    city_toll_fee_rate_schema = CityTollFeeRateSchema()
+
+    @bp.route('/')
+    def index():  # pragma: no cover
+        return redirect(url_for('apifairy.docs'))
+    
+    
     @bp.route('/city/detail', methods=['GET'])
     def get_city():
         response = application_adapter.get_city_details()
         if response:
             return jsonify(response.to_dict())
         return {
-                "message": "Company not found"
-            }, 200
+                "message": "City not found"
+            }, 404
     
+
     @bp.route('/city/rates', methods=['GET'])
+    @response(city_toll_fee_rate_schema)
+    @other_responses({404: 'City rates not found'})
     def get_city_rates():
         responses = application_adapter.get_city_toll_fee_rates()
         if responses:
@@ -30,16 +44,26 @@ def routes(application_adapter):
             for row in responses:
                 items.append(row.to_dict())
             return jsonify(items)
-        return {
-                "message": "Company rates not found"
-            }, 200
+    
+
+    @bp.route('/city/vehicle/fees', methods=['POST'])
+    @body(vehicle_toll_fees_request_schema)
+    @response(vehicle_toll_fees_request_schema, 201)
+    @other_responses({403: 'Forbidden'})
+    def calculate_vehicle_toll_fee_rate(vehicle, vehicle_number):
+        responses = application_adapter.get_vehicle_toll_fee(vehicle, vehicle_number)
+        if responses:
+            return jsonify(responses)
+        abort(403)
 
 def create_app(config):
     app = Flask(__name__)
     app.config.from_object(config)
 
     db.init_app(app)
+    ma.init_app(app)
     migrate.init_app(app, db)
+    apifairy.init_app(app)
 
     seeder = FlaskSeeder()
     seeder.init_app(app, db)

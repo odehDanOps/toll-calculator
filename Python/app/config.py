@@ -17,10 +17,16 @@ CITY_VEHICLES = {
     6: Car(),
     7: Buss()
 }
-CITY_DATA = {
-    "name": "Gothenburg",
+COUNTRY_DATA = {
+    "name": "Sweden",
     "currency": CURRENCY
 }
+
+CITY_DATA = {
+    "name": "Gothenburg",
+    "country_id": 1 # manually mapping city to Sweden
+}
+
 CITY_TOLL_FEE_RATE_DATA = [
    {"start_time": time(6, 0), "end_time": time(6, 29),  "fee": 8 },
    {"start_time": time(6, 30), "end_time": time(6, 59),  "fee": 13 },
