@@ -5,9 +5,9 @@ from app.model import engine, Country, City, CityTollFeeRate
 from app.config import COUNTRY_DATA, CITY_DATA,  CITY_TOLL_FEE_RATE_DATA
 
 def seed_data_to_db(seeder_cls, db_model, data, comment):
-     try:	
+    try:	
         data_to_be_added = db_model(**data)
-        print(f"Adding {comment}:{ %s}" % datdata_to_be_addeda)
+        print(f"Adding {comment}: %s" % data_to_be_added)
         seeder_cls.db.session.add(data_to_be_added)
 
     except Exception as e:
@@ -23,16 +23,7 @@ class CountrySeeder(Seeder):
 
     def run(self):
         seed_data_to_db(self, Country, COUNTRY_DATA, "country")
-        # try:	
-        #     country = Country(**COUNTRY_DATA)
-        #     print("Adding country: %s" % country)
-        #     self.db.session.add(country)
 
-        # except Exception as e:
-        #     self.db.rollback()
-        #     raise e
-        # else:
-        #     self.db.session.commit()
 
 class CitySeeder(Seeder):
     def __init__(self):
@@ -41,16 +32,7 @@ class CitySeeder(Seeder):
 
     def run(self):
         seed_data_to_db(self, City, CITY_DATA, "city")
-        # try:	
-        #     city = City(**CITY_DATA)
-        #     print("Adding city: %s" % city)
-        #     self.db.session.add(city)
 
-        # except Exception as e:
-        #     self.db.rollback()
-        #     raise e
-        # else:
-        #     self.db.session.commit()
 
 class CityTollFeeRateSeeder(Seeder):
     def __init__(self):

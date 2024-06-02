@@ -13,25 +13,35 @@ apifairy = APIFairy()
 bp = Blueprint('fees', __name__)
 
 def routes(application_adapter):
-    from .schema import VehicleTollFeeSchema, VehicleTollFeeRequestSchema, \
-        CityTollFeeRateSchema
+    from .schema import CountrySchema, CitySchema, VehicleTollFeeSchema, \
+        VehicleTollFeeRequestSchema, CityTollFeeRateSchema
+    country_schema = CountrySchema()
+    city_schema = CitySchema()
     vehicle_toll_fees_request_schema = VehicleTollFeeRequestSchema()
     vehicle_toll_fee_schema = VehicleTollFeeSchema()
-    city_toll_fee_rate_schema = CityTollFeeRateSchema()
+    city_toll_fee_rate_schema = CityTollFeeRateSchema(many=True)
 
     @bp.route('/')
     def index():  # pragma: no cover
         return redirect(url_for('apifairy.docs'))
     
     
+    @bp.route('/city/country', methods=['GET'])
+    @response(country_schema)
+    @other_responses({404: 'Country not found'})
+    def get_city_country():
+        response = application_adapter.get_city_country_details()
+        if response:
+            return response
+        
+    
     @bp.route('/city/detail', methods=['GET'])
+    @response(city_schema)
+    @other_responses({404: 'City not found'})
     def get_city():
         response = application_adapter.get_city_details()
         if response:
-            return jsonify(response.to_dict())
-        return {
-                "message": "City not found"
-            }, 404
+            return response
     
 
     @bp.route('/city/rates', methods=['GET'])
@@ -40,10 +50,7 @@ def routes(application_adapter):
     def get_city_rates():
         responses = application_adapter.get_city_toll_fee_rates()
         if responses:
-            items = []
-            for row in responses:
-                items.append(row.to_dict())
-            return jsonify(items)
+            return responses
     
 
     @bp.route('/city/vehicle/fees', methods=['POST'])

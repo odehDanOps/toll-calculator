@@ -69,7 +69,7 @@ class City(engine.Model):
         }
 
     def __repr__(self) -> str:
-        return f"City(name={self.name!r}, country={self.country.name!r})"
+        return f"City(name={self.name!r}, country={self.country_id!r})"
 
 
 class CityTollFeeRate(engine.Model):
